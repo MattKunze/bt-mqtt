@@ -1,17 +1,17 @@
 # Project Status
 
 **Last Updated:** 2026-01-11
-**Current Phase:** Planning & Initial Documentation
-**Overall Progress:** 5% (Documentation phase)
+**Current Phase:** Phase 1 - Foundation
+**Overall Progress:** 40% (Scanner implementation complete)
 
 ## Overview
 
-The BT-MQTT project is in its initial phase. We've completed architectural planning and are creating foundational documentation and project structure. The focus is on establishing a clear design and roadmap before implementation begins.
+The BT-MQTT project has completed planning and documentation phase and is now in active Phase 1 implementation. The Python BLE scanner agent is fully implemented and ready for testing. Next steps are implementing the TypeScript subscriber service and database layer.
 
-## Current Milestone: Documentation & Planning
+## Current Milestone: Phase 1 - Scanner Implementation
 
-**Target:** Complete all planning artifacts and begin Phase 1 implementation
-**Progress:** 2/4 major deliverables complete
+**Target:** Complete BLE scanner agent with MQTT publishing
+**Progress:** Scanner implementation complete
 
 ### Completed ✅
 - ✅ Architecture design and component breakdown
@@ -20,12 +20,22 @@ The BT-MQTT project is in its initial phase. We've completed architectural plann
 - ✅ Database schema design (PostgreSQL with Kysely)
 - ✅ Project structure creation
 - ✅ Main README.md
+- ✅ All Architecture Decision Records (ADRs)
+- ✅ All feature specifications
+- ✅ Core documentation files
+- ✅ **Scanner: Python package structure (pyproject.toml)**
+- ✅ **Scanner: Configuration management (YAML)**
+- ✅ **Scanner: BLE scanning with bleak**
+- ✅ **Scanner: MQTT publishing with paho-mqtt**
+- ✅ **Scanner: Application lifecycle and signal handling**
+- ✅ **Scanner: Structured logging (JSON/text)**
+- ✅ **Scanner: Basic tests**
 
 ### In Progress 🚧
-- 🚧 Architecture Decision Records (ADRs)
-- 🚧 Feature specifications
-- 🚧 Core documentation files
-- 🚧 Development environment setup
+- 🚧 Subscriber: TypeScript project setup
+- 🚧 Subscriber: Database migrations with Kysely
+- 🚧 Subscriber: MQTT subscription
+- 🚧 Subscriber: Raw data storage
 
 ### Blocked 🚫
 None currently
@@ -66,18 +76,18 @@ None currently
 
 ## Phase Progress
 
-### Phase 1: Foundation (0% complete)
+### Phase 1: Foundation (40% complete)
 **Goal:** Working end-to-end raw data pipeline
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| BLE Scanner | Not Started | Python with bleak |
-| MQTT Publisher | Not Started | Publish to mqtt.shypan.st |
+| BLE Scanner | ✅ Complete | Python with bleak, full implementation |
+| MQTT Publisher | ✅ Complete | paho-mqtt, publishes to bt-mqtt/raw/{scanner_id} |
+| Configuration | ✅ Complete | YAML-based config with env var substitution |
 | MQTT Subscriber | Not Started | Subscribe to bt-mqtt/raw/# |
 | Raw Storage | Not Started | PostgreSQL with Kysely |
 | Database Setup | Not Started | Initial schema migration |
-| Configuration | Not Started | YAML config files |
-| Docker Compose | Not Started | PostgreSQL container |
+| Docker Compose | ✅ Complete | PostgreSQL container ready |
 
 ### Phase 2: Core Features (0% complete)
 **Goal:** Production-ready with parser system

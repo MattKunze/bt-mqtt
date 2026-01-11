@@ -4,9 +4,11 @@
 scanner:
   # Unique identifier for this scanner
   # Used in MQTT topics and database records
-  id: pi-zero-living-room
+  # Must be unique across all scanners
+  id: scanner-01
   
   # Bluetooth adapter to use (usually hci0)
+  # List available adapters: hciconfig
   bluetooth_adapter: hci0
 
 mqtt:
@@ -30,7 +32,8 @@ mqtt:
 
 deduplication:
   # Enable deduplication to reduce message volume
-  enabled: true
+  # NOTE: Deduplication is Phase 2 feature - set to false for Phase 1
+  enabled: false
   
   # Only send advertisement if device not seen in this many seconds
   interval_seconds: 30
@@ -40,7 +43,8 @@ deduplication:
 
 blocklist:
   # Enable device filtering
-  enabled: true
+  # NOTE: Blocklist is Phase 2 feature - set to false for Phase 1
+  enabled: false
   
   # List of device MAC addresses to ignore
   # Format: uppercase with colons (AA:BB:CC:DD:EE:FF)
@@ -60,9 +64,10 @@ logging:
   # file: /var/log/bt-mqtt-scanner.log
 
 # Heartbeat configuration
+# NOTE: Heartbeat is Phase 2 feature - set to false for Phase 1
 heartbeat:
   # Enable periodic status messages
-  enabled: true
+  enabled: false
   
   # Send heartbeat every N seconds
   interval_seconds: 60
