@@ -132,8 +132,8 @@ class ScannerApp:
     def _on_mqtt_connect(self) -> None:
         """Called when MQTT connection established."""
         logger.info("MQTT connected - publishing will begin")
-        # Send initial status
-        asyncio.create_task(self._publish_status())
+        # Note: Can't use asyncio.create_task from MQTT thread
+        # Status will be published by heartbeat loop if enabled
 
     def _on_mqtt_disconnect(self) -> None:
         """Called when MQTT connection lost."""

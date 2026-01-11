@@ -129,22 +129,55 @@ class BLEScanner:
         logger.info("BLE scanner stopped")
 
     async def _scan_loop(self) -> None:
-        """Main scanning loop."""
+        """Main scanning loop with retry logic."""
+        retry_count = 0
+        max_retries = 10
+
         while self._running:
             try:
                 if self._scanner:
+                    logger.debug(f"Starting BLE scan (attempt {retry_count + 1})")
                     await self._scanner.start()
+                    retry_count = 0  # Reset on successful start
+
                     # Keep scanning until stopped
                     while self._running:
                         await asyncio.sleep(1)
+
                     await self._scanner.stop()
+
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.error(f"Scanner error: {e}")
+                retry_count += 1
+                error_msg = str(e)
+
+                # Provide helpful error messages
+                if "Resource Not Ready" in error_msg:
+                    logger.error(
+                        f"Bluetooth adapter not ready (attempt {retry_count}/{max_retries}). "
+                        f"Try: sudo hciconfig {self.adapter} down && sudo hciconfig {self.adapter} up"
+                    )
+                elif "Permission denied" in error_msg:
+                    logger.error(
+                        f"Permission denied accessing Bluetooth adapter. "
+                        f"Try: sudo usermod -a -G bluetooth $USER (then logout/login)"
+                    )
+                else:
+                    logger.error(f"Scanner error: {e}")
+
+                if retry_count >= max_retries:
+                    logger.critical(
+                        f"Failed to start scanner after {max_retries} attempts. Giving up."
+                    )
+                    self._running = False
+                    break
+
                 if self._running:
-                    # Wait before retrying
-                    await asyncio.sleep(5)
+                    # Exponential backoff: 5, 10, 15, 20, 30, 30, ...
+                    wait_time = min(5 * retry_count, 30)
+                    logger.info(f"Retrying in {wait_time} seconds...")
+                    await asyncio.sleep(wait_time)
 
     def _handle_advertisement(
         self, device: BLEDevice, advertisement_data: AdvertisementData
