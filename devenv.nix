@@ -4,6 +4,7 @@
   packages = [
     pkgs.postgresql_16
     pkgs.mosquitto  # MQTT client tools (mosquitto_pub, mosquitto_sub)
+    pkgs.mqttui
   ];
 
   # https://devenv.sh/languages/
