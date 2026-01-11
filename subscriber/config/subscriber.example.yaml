@@ -1,0 +1,73 @@
+# Subscriber Configuration Example
+# Copy this file to subscriber.yaml and customize
+
+mqtt:
+  # MQTT broker connection
+  broker: mqtt.shypan.st
+  port: 1883
+  
+  # Subscribe to all raw advertisements
+  topic: bt-mqtt/raw/#
+  
+  # QoS level
+  qos: 1
+  
+  # Client ID
+  client_id: subscriber-main
+  
+  # Connection settings
+  keepalive: 60
+  reconnect_delay: 5
+
+database:
+  # PostgreSQL connection
+  host: localhost
+  port: 5432
+  database: bt_mqtt
+  user: btmqtt
+  
+  # Password from environment variable: DB_PASSWORD
+  # Never commit passwords to version control
+  password: ${DB_PASSWORD}
+  
+  # Connection pool settings
+  pool:
+    min: 2
+    max: 10
+    idle_timeout_ms: 30000
+
+# Parser configuration
+# Parsers are registered in code, this just enables/disables them
+parsers:
+  environmental:
+    enabled: true
+  beacon:
+    enabled: false
+
+# Storage configuration
+storage:
+  # Retention policy for raw advertisements (days)
+  # 0 = keep forever
+  raw_retention_days: 90
+  
+  # Batch insert size for performance
+  batch_size: 100
+  
+  # Batch flush interval (milliseconds)
+  batch_flush_ms: 5000
+
+logging:
+  # Log level: debug, info, warn, error
+  level: info
+  
+  # Log format: text or json
+  format: json
+  
+  # Pretty print logs (only for text format)
+  pretty: false
+
+# Monitoring (future)
+# monitoring:
+#   enabled: false
+#   port: 9090
+#   path: /metrics

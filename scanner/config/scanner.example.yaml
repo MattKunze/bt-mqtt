@@ -1,0 +1,68 @@
+# Scanner Configuration Example
+# Copy this file to scanner.yaml and customize
+
+scanner:
+  # Unique identifier for this scanner
+  # Used in MQTT topics and database records
+  id: pi-zero-living-room
+  
+  # Bluetooth adapter to use (usually hci0)
+  bluetooth_adapter: hci0
+
+mqtt:
+  # MQTT broker connection
+  broker: mqtt.shypan.st
+  port: 1883
+  
+  # Topic configuration
+  topic_prefix: bt-mqtt
+  
+  # QoS level (0, 1, or 2)
+  # 1 = at least once delivery (recommended)
+  qos: 1
+  
+  # Client ID prefix (will append scanner_id)
+  client_id_prefix: scanner
+  
+  # Connection settings
+  keepalive: 60
+  reconnect_delay: 5
+
+deduplication:
+  # Enable deduplication to reduce message volume
+  enabled: true
+  
+  # Only send advertisement if device not seen in this many seconds
+  interval_seconds: 30
+  
+  # Strategy: time_based (only check time) or change_based (check data changes)
+  strategy: time_based
+
+blocklist:
+  # Enable device filtering
+  enabled: true
+  
+  # List of device MAC addresses to ignore
+  # Format: uppercase with colons (AA:BB:CC:DD:EE:FF)
+  devices: []
+    # - "AA:BB:CC:DD:EE:FF"
+    # - "11:22:33:44:55:66"
+
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: INFO
+  
+  # Log format: text or json
+  # json recommended for production
+  format: json
+  
+  # Log file path (optional, logs to stdout if not specified)
+  # file: /var/log/bt-mqtt-scanner.log
+
+# Heartbeat configuration
+heartbeat:
+  # Enable periodic status messages
+  enabled: true
+  
+  # Send heartbeat every N seconds
+  interval_seconds: 60
