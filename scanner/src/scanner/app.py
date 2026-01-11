@@ -11,6 +11,7 @@ from typing import Optional
 
 from .ble_scanner import Advertisement, BLEScanner
 from .config import Config
+from .deduplicator import Deduplicator
 from .logging_config import setup_logging
 from .mqtt_publisher import MQTTPublisher
 
@@ -29,11 +30,14 @@ class ScannerApp:
         self.config = config
         self.mqtt_publisher: Optional[MQTTPublisher] = None
         self.ble_scanner: Optional[BLEScanner] = None
+        self.deduplicator: Optional[Deduplicator] = None
         self._shutdown_event = asyncio.Event()
         self._start_time = time.time()
         self._devices_seen: set[str] = set()
         self._messages_published = 0
+        self._messages_deduplicated = 0
         self._heartbeat_task: Optional[asyncio.Task[None]] = None
+        self._cleanup_task: Optional[asyncio.Task[None]] = None
 
     async def run(self) -> None:
         """Run the scanner application."""
@@ -60,6 +64,17 @@ class ScannerApp:
 
             # Wait for MQTT connection
             await asyncio.sleep(2)
+
+            # Initialize deduplicator if enabled
+            if self.config.deduplication.enabled:
+                self.deduplicator = Deduplicator(
+                    interval_seconds=self.config.deduplication.interval_seconds
+                )
+                logger.info(
+                    f"Deduplication enabled: {self.config.deduplication.interval_seconds}s interval"
+                )
+                # Start cleanup task to prevent memory growth
+                self._cleanup_task = asyncio.create_task(self._cleanup_loop())
 
             # Initialize BLE scanner
             self.ble_scanner = BLEScanner(
@@ -89,6 +104,14 @@ class ScannerApp:
     async def shutdown(self) -> None:
         """Shutdown the application gracefully."""
         logger.info("Shutting down scanner")
+
+        # Stop cleanup task
+        if self._cleanup_task:
+            self._cleanup_task.cancel()
+            try:
+                await self._cleanup_task
+            except asyncio.CancelledError:
+                pass
 
         # Stop heartbeat
         if self._heartbeat_task:
@@ -123,11 +146,20 @@ class ScannerApp:
                 logger.debug(f"Blocked device: {advertisement.device_address}")
                 return
 
+        # Check deduplication
+        if self.deduplicator:
+            if not self.deduplicator.should_publish(advertisement.device_address):
+                self._messages_deduplicated += 1
+                return
+
         # Publish to MQTT
         if self.mqtt_publisher:
             success = self.mqtt_publisher.publish_advertisement(advertisement)
             if success:
                 self._messages_published += 1
+                logger.info(
+                    f"Published: {advertisement.device_address} (RSSI: {advertisement.rssi})"
+                )
 
     def _on_mqtt_connect(self) -> None:
         """Called when MQTT connection established."""
@@ -152,6 +184,21 @@ class ScannerApp:
             except Exception as e:
                 logger.error(f"Error in heartbeat loop: {e}")
 
+    async def _cleanup_loop(self) -> None:
+        """Periodic cleanup of old deduplication entries."""
+        while True:
+            try:
+                # Clean up every hour
+                await asyncio.sleep(3600)
+                if self.deduplicator:
+                    removed = self.deduplicator.clear_old_entries()
+                    if removed > 0:
+                        logger.info(f"Cleaned up {removed} old deduplication entries")
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error(f"Error in cleanup loop: {e}")
+
     async def _publish_status(self) -> None:
         """Publish scanner status."""
         if not self.mqtt_publisher:
@@ -167,6 +214,7 @@ class ScannerApp:
             "metrics": {
                 "messages_sent": self._messages_published,
                 "messages_dropped": mqtt_stats["messages_failed"],
+                "messages_deduplicated": self._messages_deduplicated,
                 "devices_seen": len(self._devices_seen),
                 "devices_blocked": 0,  # TODO: track blocked count
             },

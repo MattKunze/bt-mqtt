@@ -141,8 +141,20 @@ class BLEScanner:
                     retry_count = 0  # Reset on successful start
 
                     # Keep scanning until stopped
+                    # Use a stop event instead of polling every second
+                    stop_event = asyncio.Event()
+
+                    def check_running():
+                        if not self._running:
+                            stop_event.set()
+
+                    # Check every 5 seconds instead of every 1 second
                     while self._running:
-                        await asyncio.sleep(1)
+                        try:
+                            await asyncio.wait_for(stop_event.wait(), timeout=5.0)
+                            break
+                        except asyncio.TimeoutError:
+                            continue
 
                     await self._scanner.stop()
 

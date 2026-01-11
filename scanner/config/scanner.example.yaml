@@ -31,9 +31,9 @@ mqtt:
   reconnect_delay: 5
 
 deduplication:
-  # Enable deduplication to reduce message volume
-  # NOTE: Deduplication is Phase 2 feature - set to false for Phase 1
-  enabled: false
+  # Enable deduplication to reduce message volume and CPU usage
+  # This will only publish each device once per interval
+  enabled: true
   
   # Only send advertisement if device not seen in this many seconds
   interval_seconds: 30
