@@ -66,6 +66,14 @@ As you work, keep these updated:
 
 Don't ask permission to update documentation - just do it as part of the work.
 
+## Git and Version Control
+
+- **Never automatically commit changes** unless explicitly requested
+- **Never automatically push changes** unless explicitly requested
+- Only create commits when the user specifically asks to commit
+- Only push to remote when the user specifically asks to push
+- When asked to commit, follow the git commit guidelines in the system prompt
+
 ## Expectations
 
 - Understand the full context before implementing
